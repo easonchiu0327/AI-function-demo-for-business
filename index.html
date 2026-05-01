@@ -536,14 +536,14 @@ body::before {
   <button class="biz-btn clinic" onclick="selectBiz('clinic', this)">
     <div class="biz-icon">🌿</div>
     <div class="biz-info">
-      <div class="biz-name">Lin's Acupuncture</div>
+      <div class="biz-name">Clinic</div>
       <div class="biz-type">Healthcare · Clinic</div>
     </div>
   </button>
   <button class="biz-btn coffee" onclick="selectBiz('coffee', this)">
     <div class="biz-icon">☕</div>
     <div class="biz-info">
-      <div class="biz-name">Eron Coffee House</div>
+      <div class="biz-name">Coffee Shop</div>
       <div class="biz-type">Food & Beverage · Café</div>
     </div>
   </button>
@@ -646,7 +646,7 @@ body::before {
   <!-- COFFEE SECTION -->
   <div class="biz-section" id="coffee-section">
     <div class="scenario-header">
-      <div class="scenario-label coffee">Eron Coffee House · AI Features</div>
+      <div class="scenario-label coffee">Coffee Shop Coffee House · AI Features</div>
       <div class="scenario-title">Three ways AI drives more orders</div>
       <div class="scenario-desc">Click a feature to try it live</div>
     </div>
@@ -664,7 +664,7 @@ body::before {
         <div class="panel-badge coffee">Conversational AI</div>
       </div>
       <div class="panel-body">
-        <p style="font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6;">Customer tells the AI how they feel or what they're craving. AI recommends the perfect drink from Eron's actual menu — and nudges them to order.</p>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6;">Customer tells the AI how they feel or what they're craving. AI recommends the perfect drink from Coffee Shop's actual menu — and nudges them to order.</p>
         <div class="query-area">
           <div class="query-input-row">
             <input class="query-input" id="coffeeRecommendInput" placeholder="e.g. I'm tired, want something sweet but not too sweet..." onkeydown="if(event.key==='Enter') getCoffeeRec()">
@@ -808,11 +808,11 @@ function mockClaudeResponse(messages, systemPrompt) {
 
   if (prompt.includes('friendly ai barista') && prompt.includes('confirm/match')) {
     const order = mockPick(
-      ['Eron Latte', 'Cold Brew', 'Chai Latte', 'Pour Over', 'Earl Grey Fog'],
+      ['Coffee Shop Latte', 'Cold Brew', 'Chai Latte', 'Pour Over', 'Earl Grey Fog'],
       userText
     );
     const priceMap = {
-      'Eron Latte': '$5.75',
+      'Coffee Shop Latte': '$5.75',
       'Cold Brew': '$5.50',
       'Chai Latte': '$5.50',
       'Pour Over': '$5.00',
@@ -823,12 +823,12 @@ function mockClaudeResponse(messages, systemPrompt) {
 
   if (prompt.includes('enthusiastic ai barista')) {
     const rec = mockPick(
-      ['Ceremonial Matcha', 'Eron Latte', 'Hibiscus Cooler', 'Flat White', 'Iced Matcha Latte'],
+      ['Ceremonial Matcha', 'Coffee Shop Latte', 'Hibiscus Cooler', 'Flat White', 'Iced Matcha Latte'],
       userText
     );
     const priceMap = {
       'Ceremonial Matcha': '$6.25',
-      'Eron Latte': '$5.75',
+      'Coffee Shop Latte': '$5.75',
       'Hibiscus Cooler': '$5.00',
       'Flat White': '$5.25',
       'Iced Matcha Latte': '$6.50'
@@ -856,7 +856,7 @@ let currentVoiceTarget = null;
 // ─── MENU DATA ───────────────────────────────────────────
 const menuDB = [
   { name: 'Signature Espresso', desc: 'Bold, dark chocolate notes', price: 4.50, tags: ['hot','caffeine','strong'], emoji: '☕' },
-  { name: 'Eron Latte', desc: 'Velvety double shot with oat milk option', price: 5.75, tags: ['hot','caffeine','mild','dairy-free-option'], emoji: '🥛' },
+  { name: 'Coffee Shop Latte', desc: 'Velvety double shot with oat milk option', price: 5.75, tags: ['hot','caffeine','mild','dairy-free-option'], emoji: '🥛' },
   { name: 'Cold Brew', desc: '18-hour steeped, smooth & strong', price: 5.50, tags: ['cold','caffeine','strong'], emoji: '🧊' },
   { name: 'Flat White', desc: 'Intense ristretto with micro-foam', price: 5.25, tags: ['hot','caffeine','strong'], emoji: '🫧' },
   { name: 'Ceremonial Matcha', desc: 'Premium Japanese matcha, oat milk', price: 6.25, tags: ['hot','no-caffeine','matcha','dairy-free'], emoji: '🍵' },
@@ -1119,8 +1119,8 @@ Keep total response under 100 words. Be warm and professional.`
     try {
       const reply = await callClaude(
         [{ role: 'user', content: text }],
-        `You are a friendly AI barista at Eron Coffee House in Saskatoon.
-Menu: Signature Espresso $4.50, Eron Latte $5.75, Cold Brew $5.50, Flat White $5.25, Ceremonial Matcha $6.25, Iced Matcha Latte $6.50, Earl Grey Fog $5.75, Chai Latte $5.50, Hibiscus Cooler $5.00, Pour Over $5.00. Pastries: Butter Croissant $4.00, Cinnamon Roll $5.00.
+        `You are a friendly AI barista at Coffee Shop Coffee House in Saskatoon.
+Menu: Signature Espresso $4.50, Coffee Shop Latte $5.75, Cold Brew $5.50, Flat White $5.25, Ceremonial Matcha $6.25, Iced Matcha Latte $6.50, Earl Grey Fog $5.75, Chai Latte $5.50, Hibiscus Cooler $5.00, Pour Over $5.00. Pastries: Butter Croissant $4.00, Cinnamon Roll $5.00.
 A customer just described their order or craving. Confirm/match it to our menu. If unclear, recommend the best match.
 Be friendly, enthusiastic, under 80 words. End with confirming the order total if possible.`
       );
@@ -1196,10 +1196,10 @@ async function getCoffeeRec() {
   try {
     const reply = await callClaude(
       [{ role: 'user', content: input }],
-      `You are an enthusiastic AI barista at Eron Coffee House in Saskatoon, SK.
+      `You are an enthusiastic AI barista at Coffee Shop Coffee House in Saskatoon, SK.
 Menu items with prices:
 - Signature Espresso $4.50 (bold, strong)
-- Eron Latte $5.75 (creamy, mild)  
+- Coffee Shop Latte $5.75 (creamy, mild)  
 - Cold Brew $5.50 (smooth, strong, cold)
 - Flat White $5.25 (intense, hot)
 - Ceremonial Matcha $6.25 (earthy, calming, hot)
@@ -1271,7 +1271,7 @@ async function runMenuQuery() {
     const menuList = filtered.map(i => `${i.name} ($${i.price.toFixed(2)})`).join(', ');
     const reply = await callClaude(
       [{ role: 'user', content: `Customer searched for: "${query}". Matching items: ${menuList}` }],
-      `You are a concise AI assistant for Eron Coffee. Given the search results, write one friendly sentence explaining why these match and highlight the best pick. Under 40 words.`
+      `You are a concise AI assistant for Coffee Shop Coffee. Given the search results, write one friendly sentence explaining why these match and highlight the best pick. Under 40 words.`
     );
     aiTextEl.textContent = reply;
   } catch(e) {
