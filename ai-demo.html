@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Features Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c0e;
+  --surface: #141416;
+  --border: rgba(255,255,255,0.07);
+  --text: #f0eee8;
+  --muted: rgba(240,238,232,0.45);
+  --clinic-accent: #7eb89a;
+  --clinic-glow: rgba(126,184,154,0.15);
+  --coffee-accent: #d4955a;
+  --coffee-glow: rgba(212,149,90,0.15);
+  --active-accent: #7eb89a;
+  --active-glow: rgba(126,184,154,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* GRID NOISE */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* HERO */
+.hero {
+  text-align: center;
+  padding: 80px 40px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+.hero-label span { color: var(--clinic-accent); }
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+.hero-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.hero-sub {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 480px;
+  margin: 0 auto 48px;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+/* BUSINESS SELECTOR */
+.selector {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 64px;
+  position: relative;
+  z-index: 1;
+}
+
+.biz-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.biz-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.biz-btn.clinic::before { background: var(--clinic-glow); }
+.biz-btn.coffee::before { background: var(--coffee-glow); }
+
+.biz-btn:hover, .biz-btn.active {
+  color: var(--text);
+  transform: translateY(-2px);
+}
+.biz-btn.clinic.active { border-color: var(--clinic-accent); box-shadow: 0 0 32px var(--clinic-glow); }
+.biz-btn.coffee.active { border-color: var(--coffee-accent); box-shadow: 0 0 32px var(--coffee-glow); }
+.biz-btn.clinic.active::before, .biz-btn:hover::before { opacity: 1; }
+.biz-btn.coffee.active::before { opacity: 1; }
+
+.biz-icon { font-size: 22px; position: relative; z-index: 1; }
+.biz-info { text-align: left; position: relative; z-index: 1; }
+.biz-name { font-weight: 600; font-size: 14px; }
+.biz-type { font-size: 11px; opacity: 0.5; margin-top: 2px; letter-spacing: 0.5px; }
+
+/* DEMO CONTAINER */
+.demo-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.scenario-header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scenario-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.scenario-label.clinic { color: var(--clinic-accent); }
+.scenario-label.coffee { color: var(--coffee-accent); }
+
+.scenario-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.scenario-desc { font-size: 14px; color: var(--muted); }
+
+/* FEATURE TABS */
+.feat-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 32px;
+  overflow-x: auto;
+}
+.feat-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 7px;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.feat-tab.active {
+  color: var(--text);
+  background: rgba(255,255,255,0.07);
+}
+.feat-tab.active.clinic { background: var(--clinic-glow); color: var(--clinic-accent); }
+.feat-tab.active.coffee { background: var(--coffee-glow); color: var(--coffee-accent); }
+
+/* DEMO PANEL */
+.demo-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  animation: fadeIn 0.35s ease;
+}
+
+.panel-header {
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+.panel-badge {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-weight: 600;
+}
+.panel-badge.clinic { background: var(--clinic-glow); color: var(--clinic-accent); border: 1px solid rgba(126,184,154,0.3); }
+.panel-badge.coffee { background: var(--coffee-glow); color: var(--coffee-accent); border: 1px solid rgba(212,149,90,0.3); }
+
+.panel-body { padding: 28px; }
+
+/* INTAKE FORM DEMO */
+.intake-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  background: rgba(255,255,255,0.01);
+}
+.upload-zone:hover { border-color: var(--clinic-accent); background: var(--clinic-glow); }
+.upload-icon { font-size: 40px; margin-bottom: 12px; display: block; }
+.upload-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.upload-text strong { color: var(--text); display: block; margin-bottom: 4px; }
+
+#fileInput { display: none; }
+
+.extracted-form { display: flex; flex-direction: column; gap: 12px; }
+.form-field {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.field-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.field-value { font-size: 14px; font-weight: 500; }
+.field-value.loading {
+  height: 14px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 4px;
+  width: 70%;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* VOICE DEMO */
+.voice-area { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.voice-ring {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+.voice-ring.listening {
+  border-color: var(--clinic-accent);
+  box-shadow: 0 0 0 8px rgba(126,184,154,0.1), 0 0 0 16px rgba(126,184,154,0.05);
+  animation: voicePulse 1.5s infinite;
+}
+.voice-ring.coffee-listen {
+  border-color: var(--coffee-accent);
+  box-shadow: 0 0 0 8px rgba(212,149,90,0.1), 0 0 0 16px rgba(212,149,90,0.05);
+  animation: voicePulse 1.5s infinite;
+}
+@keyframes voicePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.voice-status { font-size: 14px; color: var(--muted); text-align: center; }
+.voice-transcript {
+  width: 100%;
+  min-height: 60px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.6;
+}
+.voice-transcript.has-text { color: var(--text); font-style: normal; }
+
+/* AI RESPONSE */
+.ai-response {
+  width: 100%;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  min-height: 80px;
+  display: none;
+}
+.ai-response.show { display: block; }
+.ai-response-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--clinic-accent); animation: pulse 1s infinite; }
+.ai-dot.coffee { background: var(--coffee-accent); }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+.ai-text { color: var(--text); white-space: pre-wrap; }
+
+/* HISTORY DEMO */
+.history-area { display: flex; flex-direction: column; gap: 16px; }
+.history-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+.history-timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 20px;
+  bottom: 20px;
+  width: 1px;
+  background: var(--border);
+}
+.visit-item {
+  display: flex;
+  gap: 16px;
+  padding: 10px 0;
+  position: relative;
+}
+.visit-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--clinic-accent);
+  margin-top: 4px;
+  flex-shrink: 0;
+  margin-left: 11px;
+  position: relative;
+  z-index: 1;
+}
+.visit-content {}
+.visit-date { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.visit-note { font-size: 13px; }
+
+.summary-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+.summary-btn.clinic { background: var(--clinic-glow); color: var(--clinic-accent); border: 1px solid rgba(126,184,154,0.3); }
+.summary-btn.clinic:hover { background: rgba(126,184,154,0.25); }
+.summary-btn.coffee { background: var(--coffee-glow); color: var(--coffee-accent); border: 1px solid rgba(212,149,90,0.3); }
+
+/* MENU QUERY */
+.query-area { display: flex; flex-direction: column; gap: 16px; }
+.query-input-row { display: flex; gap: 10px; }
+.query-input {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.query-input:focus { border-color: var(--coffee-accent); }
+.query-input::placeholder { color: var(--muted); }
+.query-submit {
+  padding: 12px 22px;
+  background: var(--coffee-accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.query-submit:hover { background: #c4854a; }
+
+.query-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  font-size: 12px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.chip:hover { color: var(--text); border-color: var(--coffee-accent); }
+
+.menu-results {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  display: none;
+}
+.menu-results.show { display: grid; }
+.result-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  animation: fadeIn 0.3s ease;
+}
+.result-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.result-desc { font-size: 11px; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
+.result-price { font-size: 15px; font-weight: 700; color: var(--coffee-accent); }
+
+/* TYPING DOTS */
+.typing-dots { display: inline-flex; gap: 4px; align-items: center; }
+.typing-dots span {
+  width: 5px; height: 5px;
+  background: var(--muted);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+
+/* HIDDEN SECTIONS */
+.biz-section { display: none; }
+.biz-section.active { display: block; animation: fadeIn 0.4s ease; }
+
+/* FOOTER NOTE */
+.footer-note {
+  text-align: center;
+  padding: 40px;
+  font-size: 12px;
+  color: var(--muted);
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.3px;
+}
+.footer-note span { color: var(--clinic-accent); }
+
+/* ERROR */
+.error-msg {
+  color: #e07070;
+  font-size: 12px;
+  padding: 8px 12px;
+  background: rgba(224,112,112,0.08);
+  border-radius: 6px;
+  border: 1px solid rgba(224,112,112,0.2);
+  display: none;
+}
+.error-msg.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">✦ <span>Live AI Demo</span> · Powered by Claude</div>
+  <h1 class="hero-title">See what AI can do<br><em>for your business</em></h1>
+  <p class="hero-sub">Pick your business below and try each AI feature live. No tech knowledge needed.</p>
+</div>
+
+<div class="selector">
+  <button class="biz-btn clinic" onclick="selectBiz('clinic', this)">
+    <div class="biz-icon">🌿</div>
+    <div class="biz-info">
+      <div class="biz-name">Lin's Acupuncture</div>
+      <div class="biz-type">Healthcare · Clinic</div>
+    </div>
+  </button>
+  <button class="biz-btn coffee" onclick="selectBiz('coffee', this)">
+    <div class="biz-icon">☕</div>
+    <div class="biz-info">
+      <div class="biz-name">Eron Coffee House</div>
+      <div class="biz-type">Food & Beverage · Café</div>
+    </div>
+  </button>
+</div>
+
+<div class="demo-container">
+
+  <!-- CLINIC SECTION -->
+  <div class="biz-section" id="clinic-section">
+    <div class="scenario-header">
+      <div class="scenario-label clinic">Lin's Acupuncture · AI Features</div>
+      <div class="scenario-title">Three ways AI works for your clinic</div>
+      <div class="scenario-desc">Click a feature to try it live</div>
+    </div>
+
+    <div class="feat-tabs">
+      <button class="feat-tab active clinic" onclick="switchFeature('clinic', 'intake', this)">📋 Patient Intake</button>
+      <button class="feat-tab" onclick="switchFeature('clinic', 'voice', this)">🎙️ Voice Intake</button>
+      <button class="feat-tab" onclick="switchFeature('clinic', 'history', this)">📂 Treatment History</button>
+    </div>
+
+    <!-- INTAKE -->
+    <div class="demo-panel" id="clinic-intake">
+      <div class="panel-header">
+        <div class="panel-title">📋 Patient Intake via Image</div>
+        <div class="panel-badge clinic">Image AI</div>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6;">Patient hands you a handwritten or printed intake form. Instead of manually typing it — snap a photo and AI extracts everything instantly.</p>
+        <div class="intake-area">
+          <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
+            <span class="upload-icon">📄</span>
+            <div class="upload-text">
+              <strong>Upload intake form photo</strong>
+              Click to select an image of a patient form, or any document
+            </div>
+          </div>
+          <div class="extracted-form" id="extractedForm">
+            <div style="font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">Extracted Info</div>
+            <div class="form-field"><div class="field-label">Patient Name</div><div class="field-value" style="color:var(--muted); font-style:italic; font-size:13px;">Awaiting upload...</div></div>
+            <div class="form-field"><div class="field-label">Date of Birth</div><div class="field-value" style="color:var(--muted); font-style:italic; font-size:13px;">—</div></div>
+            <div class="form-field"><div class="field-label">Chief Complaint</div><div class="field-value" style="color:var(--muted); font-style:italic; font-size:13px;">—</div></div>
+            <div class="form-field"><div class="field-label">AI Service Recommendation</div><div class="field-value" style="color:var(--muted); font-style:italic; font-size:13px;">—</div></div>
+          </div>
+        </div>
+        <div class="error-msg" id="intakeError">API error — please try again.</div>
+      </div>
+    </div>
+
+    <!-- VOICE INTAKE -->
+    <div class="demo-panel" id="clinic-voice" style="display:none">
+      <div class="panel-header">
+        <div class="panel-title">🎙️ Voice Symptom Intake</div>
+        <div class="panel-badge clinic">Voice + AI</div>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:24px; line-height:1.6;">Patient describes their symptoms out loud. AI listens, understands, and recommends the right treatment — routing them before they even sit down.</p>
+        <div class="voice-area">
+          <div class="voice-ring" id="clinicVoiceBtn" onclick="toggleVoice('clinic')">🎤</div>
+          <div class="voice-status" id="clinicVoiceStatus">Click the mic to start speaking</div>
+          <div class="voice-transcript" id="clinicTranscript">Your words will appear here...</div>
+          <div class="ai-response" id="clinicVoiceResponse">
+            <div class="ai-response-header"><div class="ai-dot"></div> AI Recommendation</div>
+            <div class="ai-text" id="clinicVoiceText"></div>
+          </div>
+          <div class="error-msg" id="voiceError">Microphone not available — try typing below instead.</div>
+          <input class="query-input" id="clinicVoiceFallback" placeholder="Or type symptoms here and press Enter..." onkeydown="if(event.key==='Enter') submitTypedSymptom()" style="width:100%; display:none;">
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="demo-panel" id="clinic-history" style="display:none">
+      <div class="panel-header">
+        <div class="panel-title">📂 Treatment History Summary</div>
+        <div class="panel-badge clinic">Summarization AI</div>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6;">Before the next appointment, AI reviews all past visits and gives Dr. Lin a clear summary — patterns, progress, and suggested focus areas.</p>
+        <div class="history-area">
+          <div class="history-timeline">
+            <div class="visit-item"><div class="visit-dot"></div><div class="visit-content"><div class="visit-date">Jan 8, 2025</div><div class="visit-note">Chronic lower back pain, L4-L5 region. 8 needles placed. Patient reported 40% relief post-session.</div></div></div>
+            <div class="visit-item"><div class="visit-dot"></div><div class="visit-content"><div class="visit-date">Jan 22, 2025</div><div class="visit-note">Follow-up. Improvement noted. Added electro-stimulation. Patient sleep quality improved.</div></div></div>
+            <div class="visit-item"><div class="visit-dot"></div><div class="visit-content"><div class="visit-date">Feb 5, 2025</div><div class="visit-note">Introduced stress/anxiety protocol alongside back treatment. Patient reports work pressure.</div></div></div>
+            <div class="visit-item"><div class="visit-dot"></div><div class="visit-content"><div class="visit-date">Feb 20, 2025</div><div class="visit-note">Back pain at 20% original intensity. Anxiety sessions showing strong response. Continued both protocols.</div></div></div>
+            <div class="visit-item"><div class="visit-dot"></div><div class="visit-content"><div class="visit-date">Mar 6, 2025</div><div class="visit-note">Patient near full remission on back pain. Considering maintenance schedule. Anxiety still primary concern.</div></div></div>
+          </div>
+          <button class="summary-btn clinic" onclick="generateSummary()">✦ Generate AI Summary for Next Visit</button>
+          <div class="ai-response" id="historySummary">
+            <div class="ai-response-header"><div class="ai-dot"></div> AI Clinical Summary</div>
+            <div class="ai-text" id="historyText"></div>
+          </div>
+          <div class="error-msg" id="historyError">API error — please try again.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COFFEE SECTION -->
+  <div class="biz-section" id="coffee-section">
+    <div class="scenario-header">
+      <div class="scenario-label coffee">Eron Coffee House · AI Features</div>
+      <div class="scenario-title">Three ways AI drives more orders</div>
+      <div class="scenario-desc">Click a feature to try it live</div>
+    </div>
+
+    <div class="feat-tabs">
+      <button class="feat-tab active coffee" onclick="switchFeature('coffee', 'recommend', this)">☕ Drink Recommender</button>
+      <button class="feat-tab" onclick="switchFeature('coffee', 'voice', this)">🎙️ Voice Order</button>
+      <button class="feat-tab" onclick="switchFeature('coffee', 'query', this)">🔍 Smart Menu Search</button>
+    </div>
+
+    <!-- RECOMMENDER -->
+    <div class="demo-panel" id="coffee-recommend">
+      <div class="panel-header">
+        <div class="panel-title">☕ AI Drink Recommender</div>
+        <div class="panel-badge coffee">Conversational AI</div>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6;">Customer tells the AI how they feel or what they're craving. AI recommends the perfect drink from Eron's actual menu — and nudges them to order.</p>
+        <div class="query-area">
+          <div class="query-input-row">
+            <input class="query-input" id="coffeeRecommendInput" placeholder="e.g. I'm tired, want something sweet but not too sweet..." onkeydown="if(event.key==='Enter') getCoffeeRec()">
+            <button class="query-submit" onclick="getCoffeeRec()">Ask AI ✦</button>
+          </div>
+          <div class="query-chips">
+            <span class="chip" onclick="setCoffeeChip(this)">⚡ Need energy fast</span>
+            <span class="chip" onclick="setCoffeeChip(this)">🌿 Something calming</span>
+            <span class="chip" onclick="setCoffeeChip(this)">🍮 Sweet but light</span>
+            <span class="chip" onclick="setCoffeeChip(this)">🧊 Something cold</span>
+            <span class="chip" onclick="setCoffeeChip(this)">☁️ Warm and cozy</span>
+            <span class="chip" onclick="setCoffeeChip(this)">🚫 No caffeine please</span>
+          </div>
+          <div class="ai-response" id="coffeeRecResponse">
+            <div class="ai-response-header"><div class="ai-dot coffee"></div> AI Barista</div>
+            <div class="ai-text" id="coffeeRecText"></div>
+          </div>
+          <div class="error-msg" id="recError">API error — please try again.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VOICE ORDER -->
+    <div class="demo-panel" id="coffee-voice" style="display:none">
+      <div class="panel-header">
+        <div class="panel-title">🎙️ Voice Order Assistant</div>
+        <div class="panel-badge coffee">Voice + AI</div>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:24px; line-height:1.6;">Customer describes what they want in natural speech. AI matches it to the menu, confirms the order, and queues it — no tapping through menus.</p>
+        <div class="voice-area">
+          <div class="voice-ring" id="coffeeVoiceBtn" onclick="toggleVoice('coffee')">🎤</div>
+          <div class="voice-status" id="coffeeVoiceStatus">Click the mic and describe your order</div>
+          <div class="voice-transcript" id="coffeeTranscript">Your order will appear here...</div>
+          <div class="ai-response" id="coffeeVoiceResponse">
+            <div class="ai-response-header"><div class="ai-dot coffee"></div> AI Order Confirmation</div>
+            <div class="ai-text" id="coffeeVoiceText"></div>
+          </div>
+          <div class="error-msg" id="coffeeVoiceError">Microphone not available — type your order below.</div>
+          <input class="query-input" id="coffeeVoiceFallback" placeholder="Or type your order here and press Enter..." onkeydown="if(event.key==='Enter') submitCoffeeOrder()" style="width:100%; display:none;">
+        </div>
+      </div>
+    </div>
+
+    <!-- SMART SEARCH -->
+    <div class="demo-panel" id="coffee-query" style="display:none">
+      <div class="panel-header">
+        <div class="panel-title">🔍 Smart Menu Search</div>
+        <div class="panel-badge coffee">AI + Database Query</div>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6;">Customer types or speaks a natural language filter — AI understands and returns matching items from the live menu instantly.</p>
+        <div class="query-area">
+          <div class="query-input-row">
+            <input class="query-input" id="menuQueryInput" placeholder='e.g. "warm drinks under $6 with no dairy"' onkeydown="if(event.key==='Enter') runMenuQuery()">
+            <button class="query-submit" onclick="runMenuQuery()">Search ✦</button>
+          </div>
+          <div class="query-chips">
+            <span class="chip" onclick="setQueryChip(this)">No caffeine</span>
+            <span class="chip" onclick="setQueryChip(this)">Under $5.50</span>
+            <span class="chip" onclick="setQueryChip(this)">Dairy-free options</span>
+            <span class="chip" onclick="setQueryChip(this)">Hot drinks only</span>
+            <span class="chip" onclick="setQueryChip(this)">Good for studying</span>
+          </div>
+          <div class="menu-results" id="menuResults"></div>
+          <div class="ai-response" id="queryAiNote">
+            <div class="ai-response-header"><div class="ai-dot coffee"></div> AI Note</div>
+            <div class="ai-text" id="queryAiText"></div>
+          </div>
+          <div class="error-msg" id="queryError">API error — please try again.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-note">
+  Built by <span>Yichen (Eason)</span> · AI powered by Claude (Anthropic) · Azure-ready architecture
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────
+const ANTHROPIC_API_URL = window.ANTHROPIC_API_URL || 'https://api.anthropic.com/v1/messages';
+const ANTHROPIC_VERSION = '2023-06-01';
+const USE_MOCK = window.AI_DEMO_USE_MOCK !== false;
+
+function getAnthropicKey() {
+  return window.ANTHROPIC_API_KEY || localStorage.getItem('ANTHROPIC_API_KEY') || '';
+}
+
+function buildAnthropicHeaders() {
+  const headers = {
+    'Content-Type': 'application/json',
+    'anthropic-version': ANTHROPIC_VERSION
+  };
+  const key = getAnthropicKey();
+  if (key) headers['x-api-key'] = key;
+  return headers;
+}
+
+function assertAnthropicKey() {
+  if (USE_MOCK) return;
+  const key = getAnthropicKey();
+  if (!key && ANTHROPIC_API_URL.includes('api.anthropic.com')) {
+    throw new Error('Missing API key. Set window.ANTHROPIC_API_KEY or localStorage "ANTHROPIC_API_KEY".');
+  }
+}
+
+function mockDelay(ms = 700) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function mockPick(options, seedText) {
+  let hash = 0;
+  for (let i = 0; i < seedText.length; i += 1) {
+    hash = (hash * 31 + seedText.charCodeAt(i)) >>> 0;
+  }
+  return options[hash % options.length];
+}
+
+function mockClaudeResponse(messages, systemPrompt) {
+  const prompt = (systemPrompt || '').toLowerCase();
+  const userText = (messages || []).map(m => {
+    if (typeof m.content === 'string') return m.content;
+    if (Array.isArray(m.content)) return m.content.map(c => c.text || '').join(' ');
+    return '';
+  }).join(' ');
+
+  if (prompt.includes('clinical ai assistant') || prompt.includes('pre-appointment')) {
+    return `• Progress: Back pain nearly resolved (about 80-90% improvement). Anxiety/stress symptoms persist but respond well to treatment.\n• Patterns: Pain relief improved steadily with electro-stimulation; stress tends to flare during work pressure.\n• Next focus: Maintain back stability, prioritize anxiety protocol, and introduce maintenance plan discussion.\n• Follow-ups: Ask about sleep quality and confirm ideal visit cadence.`;
+  }
+
+  if (prompt.includes('caring ai intake assistant')) {
+    const service = mockPick(
+      ['Pain Management', 'Anxiety & Stress Relief', 'Sports Injury', "Women's Health", 'Internal Medicine'],
+      userText
+    );
+    return `I hear you — that sounds uncomfortable.\nRecommended service: ${service}.\nReason: Your symptoms align best with a focused ${service.toLowerCase()} protocol.\nWould you like me to reserve the next available appointment?`;
+  }
+
+  if (prompt.includes('friendly ai barista') && prompt.includes('confirm/match')) {
+    const order = mockPick(
+      ['Eron Latte', 'Cold Brew', 'Chai Latte', 'Pour Over', 'Earl Grey Fog'],
+      userText
+    );
+    const priceMap = {
+      'Eron Latte': '$5.75',
+      'Cold Brew': '$5.50',
+      'Chai Latte': '$5.50',
+      'Pour Over': '$5.00',
+      'Earl Grey Fog': '$5.75'
+    };
+    return `Got it! I recommend the ${order}. That will be ${priceMap[order]}. Want to add a Butter Croissant for $4.00? Your total would be ${priceMap[order]}.`;
+  }
+
+  if (prompt.includes('enthusiastic ai barista')) {
+    const rec = mockPick(
+      ['Ceremonial Matcha', 'Eron Latte', 'Hibiscus Cooler', 'Flat White', 'Iced Matcha Latte'],
+      userText
+    );
+    const priceMap = {
+      'Ceremonial Matcha': '$6.25',
+      'Eron Latte': '$5.75',
+      'Hibiscus Cooler': '$5.00',
+      'Flat White': '$5.25',
+      'Iced Matcha Latte': '$6.50'
+    };
+    return `Based on that, I'd go with the ${rec} (${priceMap[rec]}). It's a great fit for your mood and super satisfying. Want me to place the order?`;
+  }
+
+  if (prompt.includes('search results') || prompt.includes('given the search results')) {
+    return `These picks match your filters best. If you want one standout, I'd choose the most balanced option from the list.`;
+  }
+
+  return `All set! Let me know if you want a different option or a quick tweak.`;
+}
+
+function mockClaudeVisionResponse() {
+  return `Name: Yuki Chen\nDOB: 1990-04-18\nComplaint: Neck tension and recurring headaches after desk work\nRecommendation: Pain Management — Focused treatment to relieve cervical tension and headache triggers.`;
+}
+
+// ─── STATE ───────────────────────────────────────────────
+let currentBiz = null;
+let recognition = null;
+let isListening = false;
+let currentVoiceTarget = null;
+
+// ─── MENU DATA ───────────────────────────────────────────
+const menuDB = [
+  { name: 'Signature Espresso', desc: 'Bold, dark chocolate notes', price: 4.50, tags: ['hot','caffeine','strong'], emoji: '☕' },
+  { name: 'Eron Latte', desc: 'Velvety double shot with oat milk option', price: 5.75, tags: ['hot','caffeine','mild','dairy-free-option'], emoji: '🥛' },
+  { name: 'Cold Brew', desc: '18-hour steeped, smooth & strong', price: 5.50, tags: ['cold','caffeine','strong'], emoji: '🧊' },
+  { name: 'Flat White', desc: 'Intense ristretto with micro-foam', price: 5.25, tags: ['hot','caffeine','strong'], emoji: '🫧' },
+  { name: 'Ceremonial Matcha', desc: 'Premium Japanese matcha, oat milk', price: 6.25, tags: ['hot','no-caffeine','matcha','dairy-free'], emoji: '🍵' },
+  { name: 'Iced Matcha Latte', desc: 'Earthy, smooth, served cold', price: 6.50, tags: ['cold','no-caffeine','matcha','dairy-free'], emoji: '🧋' },
+  { name: 'Earl Grey Fog', desc: 'Lavender-bergamot steamed milk', price: 5.75, tags: ['hot','no-caffeine','calming'], emoji: '🌸' },
+  { name: 'Chai Latte', desc: 'House-spiced chai, whole or oat milk', price: 5.50, tags: ['hot','no-caffeine','spiced','dairy-free-option'], emoji: '🫖' },
+  { name: 'Hibiscus Cooler', desc: 'Tart hibiscus, honey, sparkling water', price: 5.00, tags: ['cold','no-caffeine','fruity','dairy-free'], emoji: '🌺' },
+  { name: 'Pour Over', desc: 'Single-origin, brewed to order', price: 5.00, tags: ['hot','caffeine','specialty'], emoji: '💧' },
+];
+
+// ─── BIZ SELECTOR ────────────────────────────────────────
+function selectBiz(biz, btn) {
+  currentBiz = biz;
+  document.querySelectorAll('.biz-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.biz-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(biz + '-section').classList.add('active');
+  document.querySelector('.demo-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── FEATURE TABS ────────────────────────────────────────
+function switchFeature(biz, feature, btn) {
+  // hide all panels for this biz
+  const panels = document.querySelectorAll(`#${biz}-section .demo-panel`);
+  panels.forEach(p => p.style.display = 'none');
+  // show target
+  document.getElementById(`${biz}-${feature}`).style.display = 'block';
+  // update tabs
+  const tabs = document.querySelectorAll(`#${biz}-section .feat-tab`);
+  tabs.forEach(t => { t.classList.remove('active', 'clinic', 'coffee'); });
+  btn.classList.add('active', biz);
+}
+
+// ─── API CALL ─────────────────────────────────────────────
+async function callClaude(messages, systemPrompt) {
+  if (USE_MOCK) {
+    await mockDelay();
+    return mockClaudeResponse(messages, systemPrompt);
+  }
+  assertAnthropicKey();
+  const response = await fetch(ANTHROPIC_API_URL, {
+    method: 'POST',
+    headers: buildAnthropicHeaders(),
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: messages
+    })
+  });
+  const data = await response.json();
+  if (data.error) throw new Error(data.error.message);
+  if (!data.content || !data.content[0] || !data.content[0].text) {
+    throw new Error('Empty response from API.');
+  }
+  return data.content[0].text;
+}
+
+async function callClaudeVision(base64, mediaType, prompt) {
+  if (USE_MOCK) {
+    await mockDelay(900);
+    return mockClaudeVisionResponse();
+  }
+  assertAnthropicKey();
+  const response = await fetch(ANTHROPIC_API_URL, {
+    method: 'POST',
+    headers: buildAnthropicHeaders(),
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    })
+  });
+  const data = await response.json();
+  if (data.error) throw new Error(data.error.message);
+  if (!data.content || !data.content[0] || !data.content[0].text) {
+    throw new Error('Empty response from API.');
+  }
+  return data.content[0].text;
+}
+
+// ─── FEATURE 1: IMAGE INTAKE ──────────────────────────────
+async function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const form = document.getElementById('extractedForm');
+  const fields = form.querySelectorAll('.field-value');
+  fields.forEach(f => { f.className = 'field-value loading'; f.textContent = ''; });
+  document.getElementById('intakeError').classList.remove('show');
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result.split(',')[1];
+    const mediaType = file.type;
+    try {
+      const result = await callClaudeVision(base64, mediaType,
+        `You are an AI assistant for Lin's Acupuncture Clinic. Look at this image.
+If it appears to be a patient intake form or medical document, extract:
+- Patient Name
+- Date of Birth
+- Chief Complaint or main reason for visit
+
+Then based on the chief complaint, recommend one of these services:
+Pain Management | Laser Quit Smoking | Anxiety & Stress Relief | Sports Injury | Women's Health | Internal Medicine
+
+Respond in this exact format (replace the values):
+Name: [name or "Not found"]
+DOB: [dob or "Not found"]  
+Complaint: [chief complaint or main concern]
+Recommendation: [service name] — [one sentence why]
+
+If the image is NOT a form, still respond helpfully by describing what you see and suggesting what intake information would be useful.`
+      );
+
+      const lines = result.split('\n').filter(l => l.trim());
+      const extract = (prefix) => {
+        const line = lines.find(l => l.toLowerCase().startsWith(prefix.toLowerCase()));
+        return line ? line.split(':').slice(1).join(':').trim() : '—';
+      };
+
+      const labels = ['Patient Name', 'Date of Birth', 'Chief Complaint', 'AI Service Recommendation'];
+      const values = [extract('Name'), extract('DOB'), extract('Complaint'), extract('Recommendation')];
+      
+      fields.forEach((f, i) => {
+        f.className = 'field-value';
+        f.textContent = values[i] || '—';
+      });
+    } catch(err) {
+      fields.forEach(f => { f.className = 'field-value'; f.textContent = '—'; });
+      document.getElementById('intakeError').textContent = 'Error: ' + err.message;
+      document.getElementById('intakeError').classList.add('show');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ─── FEATURE 2: VOICE ────────────────────────────────────
+function showVoiceFallback(biz, message) {
+  const fallback = document.getElementById(biz === 'clinic' ? 'clinicVoiceFallback' : 'coffeeVoiceFallback');
+  const errEl = document.getElementById(biz === 'clinic' ? 'voiceError' : 'coffeeVoiceError');
+  if (message) errEl.textContent = message;
+  errEl.classList.add('show');
+  fallback.style.display = 'block';
+  fallback.focus();
+}
+
+function clearVoiceError(biz) {
+  const errEl = document.getElementById(biz === 'clinic' ? 'voiceError' : 'coffeeVoiceError');
+  errEl.classList.remove('show');
+}
+
+function toggleVoice(biz) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  clearVoiceError(biz);
+  
+  if (!SpeechRecognition) {
+    showVoiceFallback(biz, 'Microphone not available — try typing below instead.');
+    return;
+  }
+
+  const isSecure = window.isSecureContext || location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (!isSecure) {
+    showVoiceFallback(biz, 'Microphone requires HTTPS or localhost. Open this page from a local server.');
+    return;
+  }
+
+  if (isListening) {
+    recognition.stop();
+    return;
+  }
+
+  try {
+    recognition = new SpeechRecognition();
+  } catch (e) {
+    showVoiceFallback(biz, 'Microphone initialization failed — try typing below instead.');
+    return;
+  }
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  
+  const btn = document.getElementById(biz + 'VoiceBtn');
+  const status = document.getElementById(biz + 'VoiceStatus');
+  const transcript = document.getElementById(biz + 'Transcript');
+  let hadError = false;
+
+  recognition.onstart = () => {
+    isListening = true;
+    btn.classList.add(biz === 'clinic' ? 'listening' : 'coffee-listen');
+    status.textContent = '🔴 Listening...';
+    transcript.className = 'voice-transcript';
+    transcript.textContent = '';
+  };
+
+  recognition.onresult = (e) => {
+    const text = Array.from(e.results).map(r => r[0].transcript).join('');
+    transcript.className = 'voice-transcript has-text';
+    transcript.textContent = text;
+  };
+
+  recognition.onerror = (e) => {
+    hadError = true;
+    isListening = false;
+    btn.classList.remove('listening', 'coffee-listen');
+    status.textContent = 'Mic error — type instead';
+    const msg = e.error === 'not-allowed'
+      ? 'Microphone permission denied — enable it in the browser and try again.'
+      : `Microphone error: ${e.error}.`;
+    showVoiceFallback(biz, msg);
+  };
+
+  recognition.onend = async () => {
+    isListening = false;
+    btn.classList.remove('listening', 'coffee-listen');
+    if (hadError) return;
+    const text = transcript.textContent;
+    if (!text) { status.textContent = 'Click to try again'; return; }
+    status.textContent = 'Processing...';
+    await processVoiceInput(biz, text);
+    status.textContent = 'Click to speak again';
+  };
+
+  recognition.start();
+}
+
+async function processVoiceInput(biz, text) {
+  if (biz === 'clinic') {
+    const respEl = document.getElementById('clinicVoiceResponse');
+    const textEl = document.getElementById('clinicVoiceText');
+    respEl.classList.add('show');
+    textEl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    try {
+      const reply = await callClaude(
+        [{ role: 'user', content: text }],
+        `You are a caring AI intake assistant for Lin's Acupuncture Clinic in Saskatoon. 
+A patient is describing their symptoms or concerns verbally.
+Respond with:
+1. Empathy (1 sentence)
+2. The most appropriate service recommendation from: Pain Management, Laser Quit Smoking, Anxiety & Stress Relief, Sports Injury, Women's Health, Internal Medicine
+3. A brief explanation why (1-2 sentences)
+4. A gentle prompt to book (1 sentence)
+Keep total response under 100 words. Be warm and professional.`
+      );
+      textEl.textContent = reply;
+    } catch(e) {
+      textEl.textContent = 'Error processing. Please try again.';
+    }
+  } else {
+    const respEl = document.getElementById('coffeeVoiceResponse');
+    const textEl = document.getElementById('coffeeVoiceText');
+    respEl.classList.add('show');
+    textEl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    try {
+      const reply = await callClaude(
+        [{ role: 'user', content: text }],
+        `You are a friendly AI barista at Eron Coffee House in Saskatoon.
+Menu: Signature Espresso $4.50, Eron Latte $5.75, Cold Brew $5.50, Flat White $5.25, Ceremonial Matcha $6.25, Iced Matcha Latte $6.50, Earl Grey Fog $5.75, Chai Latte $5.50, Hibiscus Cooler $5.00, Pour Over $5.00. Pastries: Butter Croissant $4.00, Cinnamon Roll $5.00.
+A customer just described their order or craving. Confirm/match it to our menu. If unclear, recommend the best match.
+Be friendly, enthusiastic, under 80 words. End with confirming the order total if possible.`
+      );
+      textEl.textContent = reply;
+    } catch(e) {
+      textEl.textContent = 'Error processing. Please try again.';
+    }
+  }
+}
+
+function submitTypedSymptom() {
+  const text = document.getElementById('clinicVoiceFallback').value.trim();
+  if (!text) return;
+  document.getElementById('clinicTranscript').className = 'voice-transcript has-text';
+  document.getElementById('clinicTranscript').textContent = text;
+  processVoiceInput('clinic', text);
+}
+
+function submitCoffeeOrder() {
+  const text = document.getElementById('coffeeVoiceFallback').value.trim();
+  if (!text) return;
+  document.getElementById('coffeeTranscript').className = 'voice-transcript has-text';
+  document.getElementById('coffeeTranscript').textContent = text;
+  processVoiceInput('coffee', text);
+}
+
+// ─── FEATURE 3: HISTORY SUMMARY ──────────────────────────
+async function generateSummary() {
+  const respEl = document.getElementById('historySummary');
+  const textEl = document.getElementById('historyText');
+  const errEl = document.getElementById('historyError');
+  respEl.classList.add('show');
+  errEl.classList.remove('show');
+  textEl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+
+  const visits = `
+Jan 8: Chronic lower back pain L4-L5. 8 needles. 40% relief post-session.
+Jan 22: Follow-up. Improvement noted. Added electro-stimulation. Sleep quality improved.
+Feb 5: Added stress/anxiety protocol. Patient reports work-related pressure.
+Feb 20: Back pain at 20% original. Anxiety sessions strong response. Continued both.
+Mar 6: Near full remission on back. Considering maintenance. Anxiety still primary concern.
+  `.trim();
+
+  try {
+    const reply = await callClaude(
+      [{ role: 'user', content: `Here are the patient's visit notes:\n\n${visits}\n\nPlease generate a pre-appointment clinical summary for Dr. Lin.` }],
+      `You are a clinical AI assistant for Dr. Miaoguang Lin at Lin's Acupuncture Clinic.
+Generate a concise pre-appointment summary including:
+• Overall progress (2-3 sentences)
+• Key patterns observed
+• Recommended focus for next session
+• Any flags or follow-up items
+Keep it professional, clinical, under 150 words. Format with bullet points.`
+    );
+    textEl.textContent = reply;
+  } catch(e) {
+    respEl.classList.remove('show');
+    errEl.textContent = 'API error: ' + e.message;
+    errEl.classList.add('show');
+  }
+}
+
+// ─── FEATURE 4: COFFEE RECOMMENDER ───────────────────────
+async function getCoffeeRec() {
+  const input = document.getElementById('coffeeRecommendInput').value.trim();
+  if (!input) return;
+  const respEl = document.getElementById('coffeeRecResponse');
+  const textEl = document.getElementById('coffeeRecText');
+  const errEl = document.getElementById('recError');
+  respEl.classList.add('show');
+  errEl.classList.remove('show');
+  textEl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  try {
+    const reply = await callClaude(
+      [{ role: 'user', content: input }],
+      `You are an enthusiastic AI barista at Eron Coffee House in Saskatoon, SK.
+Menu items with prices:
+- Signature Espresso $4.50 (bold, strong)
+- Eron Latte $5.75 (creamy, mild)  
+- Cold Brew $5.50 (smooth, strong, cold)
+- Flat White $5.25 (intense, hot)
+- Ceremonial Matcha $6.25 (earthy, calming, hot)
+- Iced Matcha Latte $6.50 (earthy, refreshing, cold)
+- Earl Grey Fog $5.75 (floral, calming, hot)
+- Chai Latte $5.50 (spiced, warming)
+- Hibiscus Cooler $5.00 (tart, fruity, cold, no caffeine)
+- Pour Over $5.00 (specialty coffee, hot)
+- Butter Croissant $4.00, Cinnamon Roll $5.00 (pastries)
+
+Based on what the customer tells you, recommend 1-2 items. Be warm, personal, conversational. Under 80 words. Mention the price. End with a light call to order.`
+    );
+    textEl.textContent = reply;
+  } catch(e) {
+    respEl.classList.remove('show');
+    errEl.textContent = 'API error: ' + e.message;
+    errEl.classList.add('show');
+  }
+}
+
+function setCoffeeChip(chip) {
+  document.getElementById('coffeeRecommendInput').value = chip.textContent;
+  getCoffeeRec();
+}
+
+// ─── FEATURE 5: MENU QUERY ────────────────────────────────
+async function runMenuQuery() {
+  const query = document.getElementById('menuQueryInput').value.trim();
+  if (!query) return;
+  const resultsEl = document.getElementById('menuResults');
+  const aiNoteEl = document.getElementById('queryAiNote');
+  const aiTextEl = document.getElementById('queryAiText');
+  const errEl = document.getElementById('queryError');
+
+  resultsEl.classList.remove('show');
+  aiNoteEl.classList.remove('show');
+  errEl.classList.remove('show');
+
+  // Simple local filter first
+  const q = query.toLowerCase();
+  let filtered = menuDB.filter(item => {
+    const matchCold = q.includes('cold') || q.includes('iced') ? item.tags.includes('cold') : true;
+    const matchHot = q.includes('hot') || q.includes('warm') ? item.tags.includes('hot') : true;
+    const matchNoCaf = q.includes('no caffeine') || q.includes('caffeine free') || q.includes('decaf') ? item.tags.includes('no-caffeine') : true;
+    const matchDairy = q.includes('dairy-free') || q.includes('no dairy') || q.includes('vegan') ? item.tags.some(t => t.includes('dairy-free')) : true;
+    const matchPrice = (() => {
+      const m = q.match(/under \$?(\d+\.?\d*)/);
+      return m ? item.price < parseFloat(m[1]) : true;
+    })();
+    return matchCold && matchHot && matchNoCaf && matchDairy && matchPrice;
+  }).slice(0, 6);
+
+  if (filtered.length === 0) filtered = menuDB.slice(0, 3);
+
+  resultsEl.innerHTML = filtered.map(item => `
+    <div class="result-card">
+      <div style="font-size:28px; margin-bottom:8px;">${item.emoji}</div>
+      <div class="result-name">${item.name}</div>
+      <div class="result-desc">${item.desc}</div>
+      <div class="result-price">$${item.price.toFixed(2)}</div>
+    </div>
+  `).join('');
+  resultsEl.classList.add('show');
+
+  // AI note
+  aiNoteEl.classList.add('show');
+  aiTextEl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  try {
+    const menuList = filtered.map(i => `${i.name} ($${i.price.toFixed(2)})`).join(', ');
+    const reply = await callClaude(
+      [{ role: 'user', content: `Customer searched for: "${query}". Matching items: ${menuList}` }],
+      `You are a concise AI assistant for Eron Coffee. Given the search results, write one friendly sentence explaining why these match and highlight the best pick. Under 40 words.`
+    );
+    aiTextEl.textContent = reply;
+  } catch(e) {
+    aiTextEl.textContent = `Found ${filtered.length} items matching your search.`;
+  }
+}
+
+function setQueryChip(chip) {
+  document.getElementById('menuQueryInput').value = chip.textContent;
+  runMenuQuery();
+}
+</script>
+</body>
+</html>
